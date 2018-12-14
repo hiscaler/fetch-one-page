@@ -1,4 +1,4 @@
-package responses
+package response
 
 type Url struct {
 	Id      string

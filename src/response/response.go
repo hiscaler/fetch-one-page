@@ -1,4 +1,4 @@
-package responses
+package response
 
 type Error struct {
 	Message string `json:"message"`
@@ -21,5 +21,5 @@ type SuccessResponse struct {
 }
 
 type SuccessData struct {
-	Items string `json:"items"`
+	Items []Url `json:"items"`
 }
