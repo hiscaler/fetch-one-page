@@ -1,2 +1,2 @@
-# fetch-one-page
-Fetch one page by configs
+# 页面数据爬取
+根据指定规则爬取单页数据
