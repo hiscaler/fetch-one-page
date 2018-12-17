@@ -5,8 +5,6 @@ import (
 	"log"
 	"response"
 	"encoding/json"
-	"fmt"
-	"strings"
 	"net/http"
 )
 
@@ -31,7 +29,7 @@ func main() {
 			urls := resp.Data.Items
 			for _, row := range urls {
 				url := row.Url
-				fmt.Println("> " + url)
+				log.Println("> " + url)
 				project := row.Project
 				msg := "> Page Render method: " + project.PageRenderMethod + ", Use Agent: "
 				if project.UseAgent {
@@ -55,10 +53,9 @@ func main() {
 				} else {
 					log.Fatalln("Response status code is " + string(response.StatusCode))
 				}
-				fmt.Println(msg)
-				fmt.Println(strings.Repeat("#", 80))
+				log.Println(msg)
 			}
-			fmt.Println("Done.")
+			log.Println("Done.")
 		}
 	} else {
 		log.Println("Read JSON file error")
