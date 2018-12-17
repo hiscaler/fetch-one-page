@@ -1,0 +1,77 @@
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": "5c10b8bc82dea9996c0025e2",
+        "projectId": "5c10738e82dea9ea89006912",
+        "url": "https://www.cbssports.com/nfl/news/nfl-dfs-week-15-top-draftkings-fanduel-daily-fantasy-football-picks-and-lineups/",
+        "documentsCount": 7,
+        "status": 0,
+        "statusFormatted": "待处理",
+        "startDatetime": null,
+        "callbackDatetime": null,
+        "callbackMessage": null,
+        "createdAt": 1544599740,
+        "project": {
+          "id": "5c10738e82dea9ea89006912",
+          "name": "en",
+          "title": "en",
+          "pageRenderMethod": "normal",
+          "pageRenderMethodFormatted": "普通方式",
+          "useAgent": false,
+          "props": [
+            {
+              "name": "title",
+              "type": "string",
+              "label": "title",
+              "required": false,
+              "rules": [
+                {
+                  "type": "css",
+                  "path": "#content > article > div.row > div > h1.article-headline",
+                  "parser": "text",
+                  "attr": ""
+                }
+              ],
+              "pipe": ""
+            },
+            {
+              "name": "content",
+              "type": "string",
+              "label": "content",
+              "required": false,
+              "rules": [
+                {
+                  "type": "css",
+                  "path": "#article-main-body",
+                  "parser": "raw",
+                  "attr": ""
+                }
+              ],
+              "pipe": ""
+            }
+          ],
+          "urlsCount": 1,
+          "status": 0,
+          "statusFormatted": "待处理",
+          "createdAt": 1544582030,
+          "createdBy": null,
+          "updatedAt": 1544585395,
+          "updatedBy": null
+        }
+      }
+    ],
+    "_links": {
+      "self": {
+        "href": "http://192.168.2.222:8003/index.php/url?_format=json&expand=project&page=1"
+      }
+    },
+    "_meta": {
+      "totalCount": 1,
+      "pageCount": 1,
+      "currentPage": 1,
+      "perPage": 20
+    }
+  }
+}
