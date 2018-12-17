@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"net/http"
 )
 
 func Read() ([]byte, bool) {
@@ -37,6 +38,22 @@ func main() {
 					msg += "Yes"
 				} else {
 					msg += "No"
+				}
+				response, err := http.Get(url)
+				if err != nil {
+					log.Fatalln(err)
+				}
+				if response.StatusCode == 200 {
+					content, err := ioutil.ReadAll(response.Body)
+					if err != nil {
+						log.Fatalln(err)
+					} else {
+						respBody := string(content)
+						log.Println(respBody)
+						// Parse source code
+					}
+				} else {
+					log.Fatalln("Response status code is " + string(response.StatusCode))
 				}
 				fmt.Println(msg)
 				fmt.Println(strings.Repeat("#", 80))
