@@ -1,5 +1,6 @@
 package response
 
+// 接口返回结构定义
 type Error struct {
 	Message string `json:"message"`
 }
