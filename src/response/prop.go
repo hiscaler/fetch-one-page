@@ -4,7 +4,8 @@ package response
 type Prop struct {
 	Name      string
 	ValueType string `json:"type"`
-	Title     string
+	Label     string
 	Required  bool
 	Rules     []Rule
+	Pipe      string
 }
