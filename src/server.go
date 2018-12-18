@@ -11,6 +11,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"time"
 	"net/url"
+	"config"
 )
 
 func Read() ([]byte, bool) {
@@ -24,6 +25,7 @@ func Read() ([]byte, bool) {
 }
 
 func main() {
+	cfg := config.NewConfig()
 	jsonByte, ok := Read()
 	if ok {
 		resp := response.SuccessResponse{}
@@ -98,13 +100,15 @@ func main() {
 					params.Set("url_id", row.Id)
 					cellJson, _ := json.Marshal(cell)
 					params.Add("cell", string(cellJson))
-					log.Println(fmt.Sprintf("%+v", params))
+					if cfg.Debug {
+						log.Println(fmt.Sprintf("%+v", params))
+					}
 					// Send to document api
 					payload := strings.NewReader(params.Encode())
 					client := &http.Client{
 						Timeout: time.Second * 5,
 					}
-					req, err := http.NewRequest("POST", "http://192.168.2.222:8003/index.php/document?url_id="+row.Id, payload)
+					req, err := http.NewRequest("POST", cfg.ApiEndpoint+"/document?url_id="+row.Id, payload)
 					if err != nil {
 						log.Fatalln("Request error: ", err)
 					}
@@ -117,11 +121,12 @@ func main() {
 					if resp.StatusCode == 200 {
 						log.Println("Success")
 						respBody, _ := ioutil.ReadAll(resp.Body)
-						log.Println("Post api return message: ", string(respBody))
+						if cfg.Debug {
+							log.Println("Post api return message: ", string(respBody))
+						}
 					} else {
 						log.Println("Fail")
 					}
-
 					resp.Body.Close()
 				}
 			} else {
