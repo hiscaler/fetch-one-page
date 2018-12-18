@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	ENV_PROD = "prod"
-	ENV_DEV  = "dev"
+	ProductEnvironment     = "prod"
+	DevelopmentEnvironment = "dev"
 )
 
 type Api struct {
@@ -32,7 +32,7 @@ func NewConfig() *Config {
 	}
 
 	json.Unmarshal(str, cfg)
-	if cfg.Env == ENV_PROD {
+	if cfg.Env == ProductEnvironment {
 		cfg.ApiEndpoint = cfg.ApiConfig.Prod
 	} else {
 		cfg.ApiEndpoint = cfg.ApiConfig.Dev
