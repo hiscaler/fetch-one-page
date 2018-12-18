@@ -55,7 +55,7 @@ func main() {
 				if err != nil {
 					log.Fatalln(err)
 				} else {
-					// Parse source code
+					// Parse page source code
 					doc, err := goquery.NewDocumentFromReader(strings.NewReader(string(respBody)))
 					if err != nil {
 						log.Fatal(err)
@@ -68,15 +68,21 @@ func main() {
 								break
 							}
 							if rule.RuleType == "css" {
-								// Single
+								// Find single item
 								switch rule.Parser {
-								case "text", "raw":
+								case "text":
 									text = doc.Find(rule.Path).Text()
+								case "raw":
+									if html, err := doc.Find(rule.Path).Html(); err == nil {
+										text = html
+									} else {
+										log.Println(err)
+									}
 								case "attr":
 									text, _ = doc.Find(rule.Path).Attr(rule.Attr)
 								}
 
-								// List
+								// Find multiple items
 								//doc.Find(rule.Path).Each(func(i int, s *goquery.Selection) {
 								//	// For each item found, get the band and title
 								//	switch rule.Parser {
