@@ -97,7 +97,7 @@ func main() {
 
 					}
 					params := url.Values{}
-					params.Set("url_id", row.Id)
+					params.Add("url_id", row.Id)
 					cellJson, _ := json.Marshal(cell)
 					params.Add("cell", string(cellJson))
 					if cfg.Debug {
