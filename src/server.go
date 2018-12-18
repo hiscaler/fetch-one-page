@@ -6,6 +6,9 @@ import (
 	"response"
 	"encoding/json"
 	"net/http"
+	"github.com/PuerkitoBio/goquery"
+	"fmt"
+	"strings"
 )
 
 func Read() ([]byte, bool) {
@@ -26,6 +29,7 @@ func main() {
 		if err != nil {
 			log.Fatalln("Parse JSON error: ", err)
 		} else {
+			log.Println(fmt.Sprintf("%+v", resp))
 			urls := resp.Data.Items
 			for _, row := range urls {
 				url := row.Url
@@ -47,8 +51,47 @@ func main() {
 						log.Fatalln(err)
 					} else {
 						respBody := string(content)
-						log.Println(respBody)
 						// Parse source code
+						doc, err := goquery.NewDocumentFromReader(strings.NewReader(respBody))
+						if err != nil {
+							log.Fatal(err)
+						}
+						payload := make(map[string]string, len(project.Props))
+						for _, prop := range project.Props {
+							text := ""
+							for _, rule := range prop.Rules {
+								if len(text) > 0 {
+									break
+								}
+								if rule.RuleType == "css" {
+									// Single
+									switch rule.Parser {
+									case "text", "raw":
+										text = doc.Find(rule.Path).Text()
+									case "attr":
+										text, _ = doc.Find(rule.Path).Attr(rule.Attr)
+									}
+
+									// List
+									//doc.Find(rule.Path).Each(func(i int, s *goquery.Selection) {
+									//	// For each item found, get the band and title
+									//	switch rule.Parser {
+									//	case "text":
+									//	case "raw":
+									//		text = s.Text()
+									//		if len(text) > 0 {
+									//			break
+									//		}
+									//		fmt.Println(prop.Name + ":" + text)
+									//	}
+									//})
+								} else if rule.RuleType == "xpath" {
+									// todo
+								}
+							}
+							payload[prop.Name] = strings.TrimSpace(text)
+						}
+						fmt.Println(fmt.Sprintf("%+v", payload))
 					}
 				} else {
 					log.Fatalln("Response status code is " + string(response.StatusCode))
