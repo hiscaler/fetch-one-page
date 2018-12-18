@@ -1,0 +1,8 @@
+{
+  "debug": true,
+  "Env": "dev",
+  "ApiConfig": {
+    "prod": "http://192.168.2.222:8003/index.php",
+    "dev": "http://192.168.2.222:8003/index.php"
+  }
+}
