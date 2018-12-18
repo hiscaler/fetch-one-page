@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 	"net/url"
+	"time"
 )
 
 func Read() ([]byte, bool) {
@@ -97,8 +98,30 @@ func main() {
 						cellJson, _ := json.Marshal(cell)
 						params.Add("cell", string(cellJson))
 						log.Println(fmt.Sprintf("%+v", params))
+						// Send to document api
+						payload := strings.NewReader(params.Encode())
+						client := &http.Client{
+							Timeout: time.Second * 5,
 						}
-						fmt.Println(fmt.Sprintf("%+v", payload))
+						req, err := http.NewRequest("POST", "http://192.168.2.222:8003/index.php/document?url_id="+row.Id, payload)
+						if err != nil {
+							log.Fatalln("Request error: ", err)
+						}
+						req.Body.Close()
+						req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+						resp, err := client.Do(req)
+						if err != nil {
+							log.Fatalln("Response error: ", err)
+						}
+						if resp.StatusCode == 200 {
+							log.Println("Success")
+							respBody, _ := ioutil.ReadAll(resp.Body)
+							log.Println("Post api return message: ", string(respBody))
+						} else {
+							log.Println("Fail")
+						}
+
+						resp.Body.Close()
 					}
 				} else {
 					log.Fatalln("Response status code is " + string(resp.StatusCode))
