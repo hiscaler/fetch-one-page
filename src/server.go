@@ -42,18 +42,17 @@ func main() {
 				} else {
 					msg += "No"
 				}
-				response, err := http.Get(urlPath)
+				resp, err := http.Get(urlPath)
 				if err != nil {
 					log.Fatalln(err)
 				}
-				if response.StatusCode == 200 {
-					content, err := ioutil.ReadAll(response.Body)
+				if resp.StatusCode == 200 {
+					respBody, err := ioutil.ReadAll(resp.Body)
 					if err != nil {
 						log.Fatalln(err)
 					} else {
-						respBody := string(content)
 						// Parse source code
-						doc, err := goquery.NewDocumentFromReader(strings.NewReader(respBody))
+						doc, err := goquery.NewDocumentFromReader(strings.NewReader(string(respBody)))
 						if err != nil {
 							log.Fatal(err)
 						}
@@ -102,7 +101,7 @@ func main() {
 						fmt.Println(fmt.Sprintf("%+v", payload))
 					}
 				} else {
-					log.Fatalln("Response status code is " + string(response.StatusCode))
+					log.Fatalln("Response status code is " + string(resp.StatusCode))
 				}
 				log.Println(msg)
 			}
