@@ -9,6 +9,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"fmt"
 	"strings"
+	"net/url"
 )
 
 func Read() ([]byte, bool) {
@@ -32,8 +33,8 @@ func main() {
 			log.Println(fmt.Sprintf("%+v", resp))
 			urls := resp.Data.Items
 			for _, row := range urls {
-				url := row.Url
-				log.Println("> " + url)
+				urlPath := row.Url
+				log.Println("> " + urlPath)
 				project := row.Project
 				msg := "> Page Render method: " + project.PageRenderMethod + ", Use Agent: "
 				if project.UseAgent {
@@ -41,7 +42,7 @@ func main() {
 				} else {
 					msg += "No"
 				}
-				response, err := http.Get(url)
+				response, err := http.Get(urlPath)
 				if err != nil {
 					log.Fatalln(err)
 				}
@@ -56,7 +57,7 @@ func main() {
 						if err != nil {
 							log.Fatal(err)
 						}
-						payload := make(map[string]string, len(project.Props))
+						cell := make(map[string]string, len(project.Props))
 						for _, prop := range project.Props {
 							text := ""
 							for _, rule := range prop.Rules {
@@ -89,7 +90,14 @@ func main() {
 									// todo
 								}
 							}
-							payload[prop.Name] = strings.TrimSpace(text)
+							cell[prop.Name] = strings.TrimSpace(text)
+
+						}
+						params := url.Values{}
+						params.Set("url_id", row.Id)
+						cellJson, _ := json.Marshal(cell)
+						params.Add("cell", string(cellJson))
+						log.Println(fmt.Sprintf("%+v", params))
 						}
 						fmt.Println(fmt.Sprintf("%+v", payload))
 					}
