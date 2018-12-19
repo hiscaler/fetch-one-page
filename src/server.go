@@ -20,6 +20,7 @@ var wg sync.WaitGroup
 
 func init() {
 	cfg = *config.NewConfig()
+	log.SetFlags(log.Ldate | log.Lshortfile)
 }
 
 func Read() ([]byte, bool) {
