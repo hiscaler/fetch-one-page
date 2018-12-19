@@ -140,8 +140,7 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 }
 
 func main() {
-	jsonByte, ok := Read()
-	if ok {
+	if jsonByte, ok := Read(); ok {
 		resp := response.SuccessResponse{}
 		err := json.Unmarshal(jsonByte, &resp)
 		if err != nil {
