@@ -14,6 +14,7 @@ import (
 	"config"
 	"sync"
 	"datasource"
+	"strconv"
 )
 
 var cfg config.Config
@@ -61,7 +62,9 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 				log.Fatal(err)
 			}
 			cell := make(map[string]string, len(project.Props))
+			cellsRawData := make(map[string][]string, 0)
 			for _, prop := range project.Props {
+				propValues := []string{}
 				text := ""
 				for _, rule := range prop.Rules {
 					if len(text) > 0 {
@@ -69,75 +72,113 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 					}
 					if rule.RuleType == "css" {
 						// Find single item
-						switch rule.Parser {
-						case "text":
-							text = doc.Find(rule.Path).Text()
-						case "raw":
-							if html, err := doc.Find(rule.Path).Html(); err == nil {
-								text = html
-							} else {
-								log.Println(err)
-							}
-						case "attr":
-							text, _ = doc.Find(rule.Path).Attr(rule.Attr)
-						}
-
-						// Find multiple items
-						//doc.Find(rule.Path).Each(func(i int, s *goquery.Selection) {
-						//	// For each item found, get the band and title
-						//	switch rule.Parser {
-						//	case "text":
-						//	case "raw":
-						//		text = s.Text()
-						//		if len(text) > 0 {
-						//			break
-						//		}
-						//		fmt.Println(prop.Name + ":" + text)
+						//switch rule.Parser {
+						//case "text":
+						//	text = doc.Find(rule.Path).Text()
+						//case "raw":
+						//	if html, err := doc.Find(rule.Path).Html(); err == nil {
+						//		text = html
+						//	} else {
+						//		log.Println(err)
 						//	}
-						//})
+						//case "attr":
+						//	text, _ = doc.Find(rule.Path).Attr(rule.Attr)
+						//}
+						// Find multiple items
+						doc.Find(rule.Path).Each(func(i int, s *goquery.Selection) {
+							switch rule.Parser {
+							case "text":
+								text = s.Text()
+							case "raw":
+								if html, err := s.Html(); err == nil {
+									text = html
+								} else {
+									log.Println(err)
+								}
+							case "attr":
+								text, _ = s.Attr(rule.Attr)
+							}
+						})
 					} else if rule.RuleType == "xpath" {
 						// todo
+						log.Println("Parse type is XPath, Don't implemented.")
 					}
 				}
+				propValues = append(propValues, text)
 				cell[prop.Name] = strings.TrimSpace(text)
+				cellsRawData[prop.Name] = propValues
+			}
+			fmt.Println(fmt.Sprintf("%#v", cellsRawData))
 
-			}
-			params := url.Values{}
-			params.Add("url_id", rUrl.Id)
-			cellJson, _ := json.Marshal(cell)
-			params.Add("cell", string(cellJson))
-			if cfg.Debug {
-				log.Println(fmt.Sprintf("%+v", params))
-			}
-			// Send to document api
-			payload := strings.NewReader(params.Encode())
-			client := &http.Client{
-				Timeout: time.Second * 5,
-			}
-			req, err := http.NewRequest("POST", cfg.ApiEndpoint+"/document?url_id="+rUrl.Id, payload)
-			if err != nil {
-				log.Fatalln("Request error: " + err.Error())
-			}
-			req.Body.Close()
-			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-			resp, err := client.Do(req)
-			if err != nil {
-				log.Fatalln("Response error: ", err)
-			}
-			if resp.StatusCode != 404 {
-				respBody, _ := ioutil.ReadAll(resp.Body)
-				if resp.StatusCode == 200 {
-					log.Println("Callback is successful")
-				} else {
-					log.Println("Callback is failed, http code is " + resp.Status)
+			cells := make([]map[string]string, 0)
+			if len(cellsRawData) > 0 {
+				usedPropName := ""
+				minSize := 1024
+				for name, items := range cellsRawData {
+					l := len(items)
+					if l != 0 && l < minSize {
+						minSize = l
+						usedPropName = name
+					} else if minSize == 1 {
+						break
+					}
 				}
+
+				for k, v := range cellsRawData[usedPropName] {
+					cellValue := map[string]string{
+						usedPropName: v,
+					}
+					for _, prop := range project.Props {
+						if prop.Name != usedPropName {
+							cellValue[prop.Name] = cellsRawData[prop.Name][k]
+						}
+					}
+					fmt.Println(fmt.Sprintf("%#v", cellValue))
+					cells = append(cells, cellValue)
+				}
+			}
+			fmt.Println(fmt.Sprintf("%#v", cells))
+
+			for i, cell := range cells {
+				log.Println("Callback #" + strconv.Itoa(i) + " Data")
+				params := url.Values{}
+				params.Add("url_id", rUrl.Id)
+				cellJson, _ := json.Marshal(cell)
+				params.Add("cell", string(cellJson))
 				if cfg.Debug {
-					log.Println("Callback return message: " + string(respBody))
+					log.Println(fmt.Sprintf("%+v", params))
 				}
-			} else {
-				log.Println("Not found callback api" + req.URL.String())
+				// Send to document api
+				payload := strings.NewReader(params.Encode())
+				client := &http.Client{
+					Timeout: time.Second * 5,
+				}
+				req, err := http.NewRequest("POST", cfg.ApiEndpoint+"/document?url_id="+rUrl.Id, payload)
+				if err != nil {
+					log.Fatalln("Request error: " + err.Error())
+				}
+				req.Body.Close()
+				req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+				resp, err := client.Do(req)
+				if err != nil {
+					log.Fatalln("Response error: ", err)
+				}
+				if resp.StatusCode != 404 {
+					respBody, _ := ioutil.ReadAll(resp.Body)
+					if resp.StatusCode == 200 {
+						log.Println("Callback is successful")
+					} else {
+						log.Println("Callback is failed, http code is " + resp.Status)
+					}
+					if cfg.Debug {
+						log.Println("Callback return message: " + string(respBody))
+					}
+				} else {
+					log.Println("Not found callback api" + req.URL.String())
+				}
+				resp.Body.Close()
 			}
-			resp.Body.Close()
+
 		}
 	} else {
 		log.Fatalln("Response status code is " + string(resp.StatusCode))
