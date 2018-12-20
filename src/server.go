@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"config"
 	"sync"
+	"datasource"
 )
 
 var cfg config.Config
@@ -115,7 +116,7 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 			}
 			req, err := http.NewRequest("POST", cfg.ApiEndpoint+"/document?url_id="+rUrl.Id, payload)
 			if err != nil {
-				log.Fatalln("Request error: ", err)
+				log.Fatalln("Request error: " + err.Error())
 			}
 			req.Body.Close()
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -123,14 +124,18 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 			if err != nil {
 				log.Fatalln("Response error: ", err)
 			}
-			if resp.StatusCode == 200 {
-				log.Println("Success")
+			if resp.StatusCode != 404 {
 				respBody, _ := ioutil.ReadAll(resp.Body)
+				if resp.StatusCode == 200 {
+					log.Println("Callback is successful")
+				} else {
+					log.Println("Callback is failed, http code is " + resp.Status)
+				}
 				if cfg.Debug {
-					log.Println("Post api return message: ", string(respBody))
+					log.Println("Callback return message: " + string(respBody))
 				}
 			} else {
-				log.Println("Fail")
+				log.Println("Not found callback api" + req.URL.String())
 			}
 			resp.Body.Close()
 		}
@@ -139,9 +144,20 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 	}
 	log.Println(msg)
 }
-
 func main() {
-	if jsonByte, ok := Read(); ok {
+	jsonByte := []byte{}
+	ok := false
+	switch cfg.DataSource {
+	case "api":
+		ds := datasource.ApiDataSource{}
+		jsonByte, ok = ds.Read()
+
+	default:
+		ds := datasource.LocalDataSource{}
+		jsonByte, ok = ds.Read()
+	}
+
+	if ok {
 		resp := response.SuccessResponse{}
 		err := json.Unmarshal(jsonByte, &resp)
 		if err != nil {

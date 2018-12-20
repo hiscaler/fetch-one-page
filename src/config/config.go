@@ -22,6 +22,7 @@ type Config struct {
 	Env         string
 	ApiEndpoint string
 	ApiConfig   Api
+	DataSource  string
 }
 
 func NewConfig() *Config {
