@@ -107,7 +107,7 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 				}
 				cellsRawData[prop.Name] = propValues
 			}
-			fmt.Println(fmt.Sprintf("%#v", cellsRawData))
+			log.Println(fmt.Sprintf("%#v", cellsRawData))
 
 			cells := make([]map[string]string, 0)
 			if len(cellsRawData) > 0 {
@@ -132,11 +132,11 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 							cellValue[prop.Name] = cellsRawData[prop.Name][k]
 						}
 					}
-					fmt.Println(fmt.Sprintf("%#v", cellValue))
+					log.Println(fmt.Sprintf("%#v", cellValue))
 					cells = append(cells, cellValue)
 				}
 			}
-			fmt.Println(fmt.Sprintf("%#v", cells))
+			log.Println(fmt.Sprintf("%#v", cells))
 
 			for i, cell := range cells {
 				log.Println("Callback #" + strconv.Itoa(i) + " Data")
