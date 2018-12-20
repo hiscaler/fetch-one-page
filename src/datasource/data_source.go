@@ -32,7 +32,7 @@ type ApiDataSource struct {
 
 func (ds *ApiDataSource) Read() ([]byte, bool) {
 	cfg := *config.NewConfig()
-	resp, err := http.Get(cfg.ApiEndpoint + "/url")
+	resp, err := http.Get(cfg.ApiEndpoint + "/url?expand=project")
 	if err != nil {
 		fmt.Println(err)
 		return nil, false
