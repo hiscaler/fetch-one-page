@@ -61,7 +61,6 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			cell := make(map[string]string, len(project.Props))
 			cellsRawData := make(map[string][]string, 0)
 			for _, prop := range project.Props {
 				propValues := []string{}
@@ -98,14 +97,14 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 							case "attr":
 								text, _ = s.Attr(rule.Attr)
 							}
+
+							propValues = append(propValues, text)
 						})
 					} else if rule.RuleType == "xpath" {
 						// todo
 						log.Println("Parse type is XPath, Don't implemented.")
 					}
 				}
-				propValues = append(propValues, text)
-				cell[prop.Name] = strings.TrimSpace(text)
 				cellsRawData[prop.Name] = propValues
 			}
 			fmt.Println(fmt.Sprintf("%#v", cellsRawData))
