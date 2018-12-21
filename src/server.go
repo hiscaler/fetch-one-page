@@ -83,7 +83,7 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 	}
 	log.Println(msg)
 	pageHtmlSource := ""
-	if project.PageRenderMethod != PageRenderNormalMethod {
+	if project.PageRenderMethod == PageRenderNormalMethod {
 		resp, err := http.Get(urlPath)
 		if err != nil {
 			log.Fatalln(err)
@@ -98,7 +98,7 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 		} else {
 			log.Fatalln("Response status code is " + string(resp.StatusCode))
 		}
-	} else if project.PageRenderMethod == PageRenderNormalMethod {
+	} else if project.PageRenderMethod == PageRenderJsMethod {
 		var err error
 		// create context
 		ctxt, cancel := context.WithCancel(context.Background())
