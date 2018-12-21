@@ -243,11 +243,11 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 				respBody, _ := ioutil.ReadAll(resp.Body)
 				if resp.StatusCode == 200 {
 					log.Println("Save document is successful")
-					rUrl.Status = UrlSuccessStatus
+					rUrl.Status = UrlWorkingStatus
 				} else {
 					log.Println("Save document is failed, http code is " + resp.Status)
-					rUrl.Status = UrlFailStatus
-					rUrl.CallbackMessage = "Save document is failed, http code is " + resp.Status
+					rUrl.Status = UrlWorkingStatus
+					rUrl.CallbackMessage = "Save document is failed, " + string(respBody)
 				}
 				if err := rUrl.Callback(cfg.ApiEndpoint); err != nil {
 					log.Println("URL callback error" + err.Error())
@@ -259,6 +259,10 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 				log.Println("Not found save document api" + req.URL.String())
 			}
 			resp.Body.Close()
+		}
+		rUrl.Status = UrlSuccessStatus
+		if err := rUrl.Callback(cfg.ApiEndpoint); err != nil {
+			log.Println("URL callback error" + err.Error())
 		}
 	} else {
 		log.Println("Can't get page HTML source from " + urlPath)
