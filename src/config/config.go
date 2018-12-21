@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"chromedp"
 )
 
 const (
@@ -23,6 +24,7 @@ type Config struct {
 	ApiEndpoint string
 	ApiConfig   Api
 	DataSource  string
+	Chromedp    chromedp.ChromeDp
 }
 
 func NewConfig() *Config {
