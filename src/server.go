@@ -51,8 +51,6 @@ func Read() ([]byte, bool) {
 	return content, true
 }
 
-var subRegexes map[string]string
-
 // Use chromedp open page, and get page html source
 func openPage(url string, pageSourceHtml *string, sleepSeconds time.Duration) chromedp.Tasks {
 	return chromedp.Tasks{
