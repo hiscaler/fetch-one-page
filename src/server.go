@@ -9,8 +9,6 @@ import (
 	"strings"
 	"net/http"
 	"config"
-	"sync"
-	"datasource"
 	"time"
 	"github.com/PuerkitoBio/goquery"
 	"strconv"
@@ -19,10 +17,11 @@ import (
 	"context"
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/cdproto/dom"
+	"github.com/chromedp/chromedp/runner"
+	"datasource"
 )
 
 var cfg config.Config
-var wg sync.WaitGroup
 
 const (
 	PageRenderNormalMethod = "normal"
@@ -70,8 +69,7 @@ func openPage(url string, pageSourceHtml *string, sleepSeconds time.Duration) ch
 	}
 }
 
-func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
-	wg.Done()
+func FetchOne(rUrl response.Url) {
 	urlPath := rUrl.Url
 	log.Println(" >>> " + urlPath)
 	project := rUrl.Project
@@ -280,7 +278,7 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 	}
 }
 
-func main() {
+func producer(url chan response.Url, oneCycle chan bool) {
 	jsonByte := []byte{}
 	ok := false
 	switch cfg.DataSource {
@@ -303,12 +301,38 @@ func main() {
 		log.Println(fmt.Sprintf("%+v", resp))
 		urls := resp.Data.Items
 		for _, row := range urls {
-			wg.Add(1)
-			FetchOne(row, &wg)
+			if row.Status == UrlPendingStatus {
+				url <- row
+			}
 		}
-		wg.Wait()
-		log.Println("Done.")
+		oneCycle <- true
 	} else {
 		log.Println("Read JSON file error")
 	}
+}
+
+func consumer(url response.Url) {
+	FetchOne(url)
+}
+
+func main() {
+	oneCycle := make(chan bool)
+	url := make(chan response.Url)
+	for {
+		go producer(url, oneCycle)
+		go func() {
+			for {
+				select {
+				case v := <-url:
+					log.Println("Read value is", v)
+					consumer(v)
+				}
+			}
+		}()
+		<-oneCycle
+		log.Println("One cycle is finished. Sleep 10 seconds.")
+		time.Sleep(10 * time.Second)
+	}
+
+	log.Println("Quit")
 }
