@@ -105,7 +105,12 @@ func FetchOne(rUrl response.Url, wg *sync.WaitGroup) {
 		defer cancel()
 
 		// create chrome instance
-		c, err := chromedp.New(ctxt, chromedp.WithLog(log.Printf))
+		//c, err := chromedp.New(ctxt, chromedp.WithLog(log.Printf))
+		c, err := chromedp.New(ctxt, chromedp.WithRunnerOptions(
+			runner.Flag("headless", cfg.Chromedp.Headless),
+			runner.Flag("disable-gpu", cfg.Chromedp.DisableGPU),
+		))
+		chromedp.WithLog(log.Printf)
 		if err != nil {
 			log.Fatal(err)
 		}
