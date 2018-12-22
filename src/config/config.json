@@ -6,6 +6,7 @@
     "dev": "http://192.168.2.222:8003/index.php"
   },
   "DataSource": "local"
+  "intervalSeconds": 10,
   "chromedp": {
     "headless": false,
     "disable-gpu": false

@@ -330,8 +330,8 @@ func main() {
 			}
 		}()
 		<-oneCycle
-		log.Println("One cycle is finished. Sleep 10 seconds.")
-		time.Sleep(10 * time.Second)
+		log.Println(fmt.Sprintf("One cycle is finished. Restart it after %d seconds later.", cfg.IntervalSeconds))
+		time.Sleep(cfg.IntervalSeconds * time.Second)
 	}
 
 	log.Println("Quit")

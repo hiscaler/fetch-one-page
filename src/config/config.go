@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"chromedp"
+	"time"
 )
 
 const (
@@ -19,12 +20,13 @@ type Api struct {
 }
 
 type Config struct {
-	Debug       bool
-	Env         string
-	ApiEndpoint string
-	ApiConfig   Api
-	DataSource  string
-	Chromedp    chromedp.ChromeDp
+	Debug           bool
+	Env             string
+	ApiEndpoint     string
+	ApiConfig       Api
+	DataSource      string
+	IntervalSeconds time.Duration
+	Chromedp        chromedp.ChromeDp
 }
 
 func NewConfig() *Config {
