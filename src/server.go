@@ -148,20 +148,6 @@ func FetchOne(rUrl response.Url) {
 					break
 				}
 				if rule.RuleType == "css" {
-					// Find single item
-					//switch rule.Parser {
-					//case "text":
-					//	text = doc.Find(rule.Path).Text()
-					//case "raw":
-					//	if html, err := doc.Find(rule.Path).Html(); err == nil {
-					//		text = html
-					//	} else {
-					//		log.Println(err)
-					//	}
-					//case "attr":
-					//	text, _ = doc.Find(rule.Path).Attr(rule.Attr)
-					//}
-					// Find multiple items
 					doc.Find(rule.Path).Each(func(i int, s *goquery.Selection) {
 						switch rule.Parser {
 						case "text":
